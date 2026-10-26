@@ -20,7 +20,7 @@ app.use(express.static('public'));
 app.use(helmet())
 app.use(cookieParser());
 app.use(cors({
-    origin: [env.clientUri, 'http://10.134.123.57:5173'],
+    origin: env.clientUri,
     credentials: true
 }))
 
