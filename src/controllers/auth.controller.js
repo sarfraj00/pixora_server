@@ -426,7 +426,7 @@ export const deleteAccount = async (req, res) => {
         const publicIds = posts.map(post => post.postPublicId);
         const sessionId = req.sessionId;
         clearRefreshTokenCookie(res);
-        await Session.findByIdAndDelete(sessionId);
+        await Session.deleteMany({ userId });
         for (let pI of publicIds) {
             await destroyUploadedImage(pI);
         }
@@ -458,7 +458,10 @@ export const verifyEmail = async (req, res) => {
         try {
             const verifiedToken = jwt.verify(token, env.emailVerificationSecret);
             const { id: userId, email } = verifiedToken;
+
             const makeUserEmailVerified = await User.findByIdAndUpdate(userId, { $set: { isEmailVerified: true }, $unset: { expireAt: '' } }, { returnDocument: "after" });
+            
+            if (!makeUserEmailVerified) return res.status(401).json({ message: 'invalid user', success: false });
 
             const userAgent = req.get('User-agent');
             const ipAddress = req.ip;
